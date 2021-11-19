@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="35c3cf40-ba4d-41fa-aebf-0a5c4dde54ab" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="listnerFlow" doc:id="9f737e0e-fbd8-48fc-94f3-b03635944e70" >
+		<http:listener doc:name="Listener" doc:id="5b19b45d-0254-442d-bad4-c3ecf6755e77" config-ref="HTTP_Listener_config" path="/test" allowedMethods="POST">
+			<repeatable-in-memory-stream />
+		</http:listener>
+		<ee:transform doc:name="Transform Message" doc:id="0e60d7bb-7e7f-4534-be1b-9f78e36819ce" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="f5db2ead-a88a-4ddf-93c2-b1f05d5523e3" message="Thanks"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="bf07edc2-7ff8-4433-b3b1-cc5ee9e9a899" >
+				<ee:transform doc:name="Transform Message" doc:id="34f06086-be0d-42e0-a22d-3ffa35c1e8da" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	Message: "Error Occurred!"
+}	]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="d4cd766d-e97f-4196-b704-7f31b6c20fe6" message="Error.."/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>
